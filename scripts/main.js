@@ -124,3 +124,19 @@ typingBox.addEventListener("input", () => {
     }, 300);
   }
 });
+const params = new URLSearchParams(window.location.search);
+const category = params.get("cat");  // english / mangal / krutidev
+
+// Automatically load correct font
+if(category === "mangal"){
+    typingBox.style.fontFamily = "'Mangal', sans-serif";
+    testText.style.fontFamily = "'Mangal', sans-serif";
+}
+else if(category === "krutidev"){
+    typingBox.style.fontFamily = "'Kruti Dev 010', 'Mangal', sans-serif";
+    testText.style.fontFamily = "'Kruti Dev 010', 'Mangal', sans-serif";
+}
+else {
+    typingBox.style.fontFamily = "sans-serif";
+    testText.style.fontFamily = "sans-serif";
+}
