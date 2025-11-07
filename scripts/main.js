@@ -1,99 +1,126 @@
-// scripts/main.js
-import { listPassages, ensureSeed } from './admin.js';
-import { getCurrentUser } from './auth.js';
+// -------------------------------
+// Typing Test Main Script
+// File: scripts/main.js
+// -------------------------------
 
-let timer = null;
-let startTime = null;
-let totalSeconds = 0;
+// DOM elements
+const passageBox = document.getElementById("passageBox");
+const typingBox = document.getElementById("typingBox");
+const fontSelect = document.getElementById("fontSelect");
+const startBtn = document.getElementById("startBtn");
+const timerDisplay = document.getElementById("timer");
+const resultBox = document.getElementById("resultBox");
 
-const passageSelect = document.getElementById('passageSelect');
-const fontSelect = document.getElementById('fontSelect');
-const testText = document.getElementById('testText');
-const typingBox = document.getElementById('typingBox');
-const startBtn = document.getElementById('startTestBtn');
-const timerDisplay = document.getElementById('timerDisplay');
-const resultBox = document.getElementById('resultBox');
+// Timer variables
+let timer = 0;
+let timerInterval = null;
+let testStarted = false;
 
-function loadPassagesToSelect(){
-  ensureSeed();
-  const arr = listPassages();
-  passageSelect.innerHTML = '';
-  arr.forEach(p=>{
-    const opt = document.createElement('option');
-    opt.value = p.id;
-    opt.textContent = `${p.title} (${p.category})`;
-    passageSelect.appendChild(opt);
-  });
-}
+// -------------------------------
+// ✅ SAMPLE PASSAGES (Later from Admin Dashboard + Firebase)
+// -------------------------------
 
-function applyFontClass(font){
-  testText.className = '';
-  typingBox.className = 'typing-box';
-  if(font === 'mangal'){
-    testText.classList.add('hindi-mangal');
-    typingBox.classList.add('hindi-mangal');
-  } else if(font === 'krutidev'){
-    testText.classList.add('hindi-krutidev');
-    typingBox.classList.add('hindi-krutidev');
-  } else {
-    // english default
+const passages = {
+  english: "The quick brown fox jumps over the lazy dog. Improve your typing speed with regular practice.",
+  mangal: "यह एक उदाहरण अनुच्छेद है जिसे आप टाइप कर सकते हैं। नियमित अभ्यास से आपकी टाइपिंग स्पीड बढ़ेगी।",
+  krutidev: "¼;g ,d mnkguh vuqPNsn gS ftldk vki VkbZYi dk iz;ksx dj ldrs gSa½"
+};
+
+// -------------------------------
+// ✅ UPDATE FONT + PASSAGE WHEN USER SELECTS LANGUAGE
+// -------------------------------
+
+fontSelect.addEventListener("change", () => {
+  const font = fontSelect.value;
+
+  if (font === "english") {
+    passageBox.style.fontFamily = "Arial, sans-serif";
+    typingBox.style.fontFamily = "Arial, sans-serif";
+    passageBox.innerText = passages.english;
   }
-}
 
-function loadSelectedPassage(){
-  const id = passageSelect.value;
-  const arr = listPassages();
-  const p = arr.find(x=>x.id===id);
-  if(!p){ testText.textContent='No passage found'; return; }
-  testText.textContent = p.text;
-}
-
-function resetTest(){
-  clearInterval(timer);
-  timer = null;
-  startTime = null;
-  totalSeconds = 0;
-  timerDisplay.textContent = '00:00';
-  typingBox.value = '';
-  typingBox.disabled = true;
-  resultBox.classList.add('hidden');
-}
-
-function startTest(){
-  resetTest();
-  typingBox.disabled = false;
-  typingBox.focus();
-  startTime = Date.now();
-  timer = setInterval(()=>{
-    totalSeconds = Math.floor((Date.now() - startTime) / 1000);
-    const mm = String(Math.floor(totalSeconds/60)).padStart(2,'0');
-    const ss = String(totalSeconds%60).padStart(2,'0');
-    timerDisplay.textContent = `${mm}:${ss}`;
-  }, 500);
-}
-
-function computeResult(){
-  const original = testText.textContent.trim();
-  const typed = typingBox.value.trim();
-  if(typed === original){
-    clearInterval(timer);
-    const secs = Math.max(1, Math.floor((Date.now() - startTime)/1000));
-    const words = original.split(/\s+/).length;
-    const wpm = Math.round((words / secs) * 60);
-    resultBox.classList.remove('hidden');
-    resultBox.innerHTML = `✅ Completed! Time: <b>${secs}s</b> | Speed: <b>${wpm} WPM</b>`;
-    typingBox.disabled = true;
+  if (font === "mangal") {
+    passageBox.style.fontFamily = "Mangal, Arial, sans-serif";
+    typingBox.style.fontFamily = "Mangal, Arial, sans-serif";
+    passageBox.innerText = passages.mangal;
   }
-}
 
-/* Events */
-document.addEventListener('DOMContentLoaded', ()=>{
-  loadPassagesToSelect();
-  loadSelectedPassage();
-  applyFontClass(fontSelect.value || 'english');
+  if (font === "krutidev") {
+    passageBox.style.fontFamily = "'Kruti Dev 010', 'Mangal', sans-serif";
+    typingBox.style.fontFamily = "'Kruti Dev 010', 'Mangal', sans-serif";
+    passageBox.innerText = passages.krutidev;
+  }
 });
 
-passageSelect && passageSelect.addEventListener('change', loadSelectedPassage);
-fontSelect && fontSelect.addEventListener('change', (e)=>{ applyFontClass(e.target.value); });
-startBtn && startBtn.addEventListener('click', startTest);
-typingBox && typingBox.addEventListener('input', computeResult);
+// -------------------------------
+// ✅ START TEST
+// -------------------------------
+
+startBtn.addEventListener("click", () => {
+  typingBox.value = "";
+  typingBox.disabled = false;
+  typingBox.focus();
+
+  timer = 0;
+  timerDisplay.innerText = "0s";
+  resultBox.innerHTML = "";
+  resultBox.classList.add("hidden");
+
+  testStarted = false;
+
+  if (timerInterval) clearInterval(timerInterval);
+});
+
+// -------------------------------
+// ✅ START TIMER WHEN USER STARTS TYPING
+// -------------------------------
+
+typingBox.addEventListener("input", () => {
+  const original = passageBox.innerText.trim();
+  const typed = typingBox.value.trim();
+
+  // Start timer only on first keystroke
+  if (!testStarted) {
+    testStarted = true;
+    timerInterval = setInterval(() => {
+      timer++;
+      timerDisplay.innerText = timer + "s";
+    }, 1000);
+  }
+
+  // ✅ When passage is completed
+  if (typed === original) {
+    clearInterval(timerInterval);
+    typingBox.disabled = true;
+
+    // Calculate WPM
+    const words = original.split(" ").length;
+    const wpm = Math.round((words / timer) * 60);
+
+    // Calculate Accuracy
+    let totalChars = original.length;
+    let correct = 0;
+
+    for (let i = 0; i < typed.length; i++) {
+      if (typed[i] === original[i]) correct++;
+    }
+
+    let accuracy = ((correct / totalChars) * 100).toFixed(2);
+
+    // Result Output
+    resultBox.classList.remove("hidden");
+    resultBox.innerHTML = `
+      ✅ <b>Test Completed!</b><br>
+      ⏱ Time Taken: <b>${timer} sec</b><br>
+      ⚡ Speed: <b>${wpm} WPM</b><br>
+      🎯 Accuracy: <b>${accuracy}%</b>
+    `;
+
+    // Celebration popup
+    setTimeout(() => {
+      alert(
+        `🎉 Test Completed!\n\nTime: ${timer}s\nSpeed: ${wpm} WPM\nAccuracy: ${accuracy}%`
+      );
+    }, 300);
+  }
+});
