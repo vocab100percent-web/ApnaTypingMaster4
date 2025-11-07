@@ -1,0 +1,78 @@
+<!-- typing-test.html -->
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Typing Test — Apna Typing Master</title>
+  <link rel="stylesheet" href="styles/style.css">
+
+  <!-- Add font-face rules here if you have font files in assets/fonts -->
+  <style>
+    /* Example: uncomment and place font files in assets/fonts/ */
+    /*
+    @font-face {
+      font-family: 'Mangal';
+      src: url('assets/fonts/Mangal.ttf') format('truetype');
+    }
+    @font-face {
+      font-family: 'Kruti Dev 010';
+      src: url('assets/fonts/KrutiDev010.ttf') format('truetype');
+    }
+    .hindi-mangal { font-family: 'Mangal', sans-serif; }
+    .hindi-krutidev { font-family: 'Kruti Dev 010', 'Mangal', sans-serif; }
+    */
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header-card">
+      <img src="assets/logo.png" class="header-logo" alt="logo">
+      <div>
+        <div class="header-title">Typing Test</div>
+        <div class="kv">Select passage, font and start typing</div>
+      </div>
+      <div style="margin-left:auto">
+        <a class="btn ghost" href="typing-options.html">Back</a>
+      </div>
+    </div>
+
+    <div style="margin-top:18px" class="test-area">
+      <div class="test-top">
+        <div style="display:flex;gap:12px;align-items:center">
+          <div>
+            <label class="kv">Passage</label><br>
+            <select id="passageSelect" class="input"></select>
+          </div>
+
+          <div>
+            <label class="kv">Font</label><br>
+            <select id="fontSelect" class="input">
+              <option value="english">English</option>
+              <option value="mangal">Hindi (Mangal)</option>
+              <option value="krutidev">Hindi (Kruti Dev)</option>
+            </select>
+          </div>
+        </div>
+
+        <div style="text-align:right">
+          <div class="kv">Timer</div>
+          <div style="font-size:20px;font-weight:700" id="timerDisplay">00:00</div>
+        </div>
+      </div>
+
+      <div id="testText" class="test-center">Select passage and click Start Test</div>
+
+      <textarea id="typingBox" class="typing-box" placeholder="Start typing..." disabled></textarea>
+
+      <div style="display:flex;gap:8px;margin-top:12px;align-items:center">
+        <button id="startTestBtn" class="btn">Start Test</button>
+        <button id="resetBtn" class="btn ghost">Reset</button>
+        <div id="resultBox" class="kv hidden" style="margin-left:12px"></div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="scripts/main.js"></script>
+</body>
+</html>
