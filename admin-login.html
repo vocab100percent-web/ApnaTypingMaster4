@@ -1,0 +1,81 @@
+<!-- admin-login.html -->
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Admin Login — Apna Typing Master</title>
+  <link rel="stylesheet" href="styles/style.css">
+</head>
+<body>
+  <div class="container">
+    <div class="header-card">
+      <img src="assets/logo.png" alt="logo" class="header-logo">
+      <div>
+        <div class="header-title">Admin Login</div>
+        <div class="kv">Login with Email/Password or Mobile OTP (simulated)</div>
+      </div>
+      <div style="margin-left:auto">
+        <a class="btn ghost" href="index.html">Home</a>
+      </div>
+    </div>
+
+    <div style="margin-top:18px" class="card">
+      <div class="title">Email / Password</div>
+      <div class="form-row">
+        <input id="adminEmail" class="input" placeholder="admin email">
+        <input id="adminPass" class="input" placeholder="password">
+        <div style="display:flex;gap:8px">
+          <button id="adminSignUp" class="btn">Sign Up (local)</button>
+          <button id="adminSignIn" class="btn ghost">Sign In</button>
+        </div>
+      </div>
+
+      <hr style="margin:12px 0">
+
+      <div class="title">Or Admin OTP (Mobile)</div>
+      <div class="form-row">
+        <input id="adminPhone" class="input" placeholder="admin mobile">
+        <div style="display:flex;gap:8px">
+          <button id="sendAdminOtp" class="btn">Send OTP</button>
+        </div>
+        <input id="adminOtp" class="input" placeholder="Enter OTP (123456)">
+        <div style="display:flex;gap:8px">
+          <button id="verifyAdminOtp" class="btn">Verify & Login</button>
+        </div>
+      </div>
+
+      <div id="adminMsg" class="kv"></div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { adminEmailSignUp, adminEmailSignIn, sendAdminOtp, verifyAdminOtp } from './scripts/auth.js';
+    document.getElementById('adminSignUp').addEventListener('click', ()=>{
+      const email = document.getElementById('adminEmail').value.trim();
+      const pass = document.getElementById('adminPass').value.trim();
+      const r = adminEmailSignUp(email, pass);
+      document.getElementById('adminMsg').textContent = r.msg;
+    });
+    document.getElementById('adminSignIn').addEventListener('click', ()=>{
+      const email = document.getElementById('adminEmail').value.trim();
+      const pass = document.getElementById('adminPass').value.trim();
+      const r = adminEmailSignIn(email, pass);
+      document.getElementById('adminMsg').textContent = r.ok ? 'Login success' : r.msg;
+      if(r.ok) setTimeout(()=> location.href='admin-dashboard.html', 700);
+    });
+
+    document.getElementById('sendAdminOtp').addEventListener('click', ()=>{
+      const phone = document.getElementById('adminPhone').value.trim();
+      const r = sendAdminOtp(phone);
+      document.getElementById('adminMsg').textContent = r.msg;
+    });
+    document.getElementById('verifyAdminOtp').addEventListener('click', ()=>{
+      const code = document.getElementById('adminOtp').value.trim();
+      const r = verifyAdminOtp(code);
+      document.getElementById('adminMsg').textContent = r.ok ? 'Admin login success' : r.msg;
+      if(r.ok) setTimeout(()=> location.href='admin-dashboard.html', 700);
+    });
+  </script>
+</body>
+</html>
