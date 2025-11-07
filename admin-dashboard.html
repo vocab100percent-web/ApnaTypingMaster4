@@ -1,0 +1,136 @@
+<!-- admin-dashboard.html -->
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Admin Dashboard — Apna Typing Master</title>
+  <link rel="stylesheet" href="styles/style.css">
+</head>
+<body>
+  <div class="container">
+    <div class="header-card">
+      <img src="assets/logo.png" class="header-logo" alt="logo">
+      <div>
+        <div class="header-title">Admin Dashboard</div>
+        <div class="kv">Add / edit / delete passages (stored locally until Firebase integration).</div>
+      </div>
+      <div style="margin-left:auto">
+        <a class="btn ghost" href="index.html">Home</a>
+      </div>
+    </div>
+
+    <div style="margin-top:14px" class="card">
+      <div class="title">Create Passage</div>
+      <div class="form-row">
+        <input id="pTitle" class="input" placeholder="Title (e.g., 'SSC Practice 1')">
+        <select id="pCategory" class="input">
+          <option value="english">English</option>
+          <option value="mangal">Hindi - Mangal (Inscript)</option>
+          <option value="krutidev">Hindi - Kruti Dev</option>
+        </select>
+        <textarea id="pText" placeholder="Passage text here..." class="input"></textarea>
+        <div style="display:flex;gap:8px">
+          <button id="createPassage" class="btn">Add Passage</button>
+          <button id="clearPassage" class="btn ghost">Clear</button>
+        </div>
+        <div id="adminMsg" class="kv"></div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:12px">
+      <div class="title">Existing Passages</div>
+      <div id="passageList" class="list"></div>
+    </div>
+
+  </div>
+
+  <script type="module">
+    import { ensureSeed, listPassages, createPassage, updatePassage, deletePassage, getPassage } from './scripts/admin.js';
+    // simple admin guard: requires that current user be admin in session (this is simulated)
+    import { getCurrentUser, isCurrentAdmin, requireAdmin } from './scripts/auth.js';
+
+    // require admin for the page (simulated)
+    if(!isCurrentAdmin()){
+      // not admin -> show notice and still allow (for demo). In production, redirect.
+      console.warn('Not logged in as admin (demo mode). You can still add passages locally.');
+    }
+
+    const msg = document.getElementById('adminMsg');
+    const titleEl = document.getElementById('pTitle');
+    const catEl = document.getElementById('pCategory');
+    const textEl = document.getElementById('pText');
+    const listEl = document.getElementById('passageList');
+
+    function refreshList(){
+      const arr = listPassages();
+      listEl.innerHTML = '';
+      if(arr.length === 0){ listEl.innerHTML = '<div class="kv">No passages found</div>'; return; }
+      arr.forEach(p=>{
+        const div = document.createElement('div');
+        div.className = 'list-item';
+        div.innerHTML = `
+          <div class="meta">
+            <div style="font-weight:700">${p.title} <span style="font-size:12px;color:var(--muted)">(${p.category})</span></div>
+            <div class="kv" style="margin-top:6px">${p.text}</div>
+            <div class="kv" style="margin-top:6px;font-size:12px">Created: ${new Date(p.createdAt).toLocaleString()}</div>
+          </div>
+          <div class="controls">
+            <button class="btn small" data-edit="${p.id}">Edit</button>
+            <button class="btn ghost small" data-del="${p.id}">Delete</button>
+          </div>
+        `;
+        listEl.appendChild(div);
+      });
+
+      // attach handlers
+      listEl.querySelectorAll('[data-del]').forEach(btn=>{
+        btn.addEventListener('click', (e)=>{
+          const id = e.target.getAttribute('data-del');
+          if(confirm('Delete passage?')){ deletePassage(id); refreshList(); }
+        });
+      });
+      listEl.querySelectorAll('[data-edit]').forEach(btn=>{
+        btn.addEventListener('click', (e)=>{
+          const id = e.target.getAttribute('data-edit');
+          const p = getPassage(id);
+          if(!p) return;
+          titleEl.value = p.title;
+          catEl.value = p.category;
+          textEl.value = p.text;
+          document.getElementById('createPassage').textContent = 'Update Passage';
+          document.getElementById('createPassage').setAttribute('data-edit-id', id);
+        });
+      });
+    }
+
+    document.getElementById('createPassage').addEventListener('click', ()=>{
+      const id = document.getElementById('createPassage').getAttribute('data-edit-id');
+      const data = { title: titleEl.value.trim(), category: catEl.value, text: textEl.value.trim() };
+      if(!data.title || !data.text){ msg.textContent = 'Title and text required'; return; }
+      if(id){
+        updatePassage(id, data);
+        document.getElementById('createPassage').removeAttribute('data-edit-id');
+        document.getElementById('createPassage').textContent = 'Add Passage';
+        msg.textContent = 'Updated passage.';
+      } else {
+        createPassage(data);
+        msg.textContent = 'Passage added.';
+      }
+      titleEl.value=''; textEl.value=''; catEl.value='english';
+      refreshList();
+    });
+
+    document.getElementById('clearPassage').addEventListener('click', ()=>{
+      titleEl.value=''; textEl.value=''; catEl.value='english';
+      document.getElementById('createPassage').removeAttribute('data-edit-id');
+      document.getElementById('createPassage').textContent = 'Add Passage';
+      msg.textContent='';
+    });
+
+    // initial
+    ensureSeed();
+    refreshList();
+  </script>
+</body>
+</html>
