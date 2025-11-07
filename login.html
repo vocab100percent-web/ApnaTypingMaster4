@@ -1,0 +1,58 @@
+<!-- login.html -->
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>User Login — Apna Typing Master</title>
+  <link rel="stylesheet" href="styles/style.css">
+</head>
+<body>
+  <div class="container">
+    <div class="header-card">
+      <img src="assets/logo.png" alt="logo" class="header-logo">
+      <div>
+        <div class="header-title">User Login (OTP)</div>
+        <div class="kv">Login using your mobile number. (OTP simulated in this demo)</div>
+      </div>
+      <div style="margin-left:auto">
+        <a class="btn ghost" href="index.html">Home</a>
+      </div>
+    </div>
+
+    <div style="margin-top:18px" class="card">
+      <div class="title">Enter Mobile Number</div>
+      <div class="form-row">
+        <input id="userPhone" class="input" placeholder="Enter mobile number (example: 9876543210)">
+        <div style="display:flex;gap:8px">
+          <button id="sendOtpBtn" class="btn">Send OTP</button>
+        </div>
+        <input id="userOtp" class="input" placeholder="Enter OTP (use 123456 for demo)">
+        <div style="display:flex;gap:8px">
+          <button id="verifyOtpBtn" class="btn">Verify & Login</button>
+        </div>
+        <div id="loginMsg" class="kv"></div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { sendUserOtp, verifyUserOtp } from './scripts/auth.js';
+    document.getElementById('sendOtpBtn').addEventListener('click', ()=>{
+      const phone = document.getElementById('userPhone').value.trim();
+      const res = sendUserOtp(phone);
+      document.getElementById('loginMsg').textContent = res.msg;
+    });
+    document.getElementById('verifyOtpBtn').addEventListener('click', ()=>{
+      const code = document.getElementById('userOtp').value.trim();
+      const res = verifyUserOtp(code);
+      if(res.ok){
+        document.getElementById('loginMsg').textContent = 'Login success! Redirecting to options...';
+        setTimeout(()=> location.href='typing-options.html', 900);
+      } else {
+        document.getElementById('loginMsg').textContent = res.msg;
+      }
+    });
+  </script>
+</body>
+</html>
